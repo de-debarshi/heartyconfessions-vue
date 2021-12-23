@@ -16,5 +16,6 @@ header {
 }
 h1 {
     font-size: 100px;
+    color: #e36379;
 }
 </style>

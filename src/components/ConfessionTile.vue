@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <!-- <div>
         {{confession._id}}<br>
         {{confession.age}}<br>
         {{confession.sex}}<br>
@@ -9,19 +9,44 @@
         {{confession.status}}<br>
         {{confession.comments}}<br>
         {{confession.commentCount}}<br>
+        <a :href="`/confession/${confession._id}`">{{confession._id}}</a>
+    </div> -->
+    <div class="confession-tile tile-shadow" @click="$emit('tileClicked', confession._id)">
+        <a :href="`/confession/${confession._id}`">{{confession._id}}</a>
+        <div class="confession-tile__content">
+            Age: {{confession.age}}
+            Gender: {{confession.sex}}
+            {{confession.content}}
+        </div>
+        <div class="confession-tile__reaction">
+            <span class="confession-tile__like-icon" @click.stop="handleLike(confession._id)">
+                <font-awesome-icon :icon="[iconState, 'heart']" />
+            </span>
+            {{confession.likes}} people like this
+            {{confession.commentCount}} total comments
+        </div>
+        <div class="confession-tile__comment-section" v-if="enableComments">
+            <div :key="comments._id" v-for="comments in confession.comments">
+                <div class="confession-tile__comment">
+                    {{comments.username}} commented on {{comments.createdAt}}
+                    {{comments.comment}}
+                </div>
+            </div>
+            <form @submit="onSubmit">
+                <!-- <input type="hidden" name="_id" v-model="_id" value="{{confession._id}}"> -->
+                <div class="form-group">
+                <input type="text" class="form-control" id="username" name="username" v-model="username" required>
+                </div>
+                <div class="form-group">
+                <textarea class="form-control" name="comment" placeholder="Type your comment here..." rows="2" v-model="comment" required></textarea>
+                </div>
+                <div class="">
+                <button class="btn btn-primary float-right" type="submit">Comment</button>
+                </div>
+            </form>
+        </div>
     </div>
-    <form @submit="onSubmit">
-        <!-- <input type="hidden" name="_id" v-model="_id" value="{{confession._id}}"> -->
-        <div class="form-group">
-        <input type="text" class="form-control" id="username" name="username" v-model="username" required>
-        </div>
-        <div class="form-group">
-        <textarea class="form-control" name="comment" placeholder="Type your comment here..." rows="2" v-model="comment" required></textarea>
-        </div>
-        <div class="">
-        <button class="btn btn-primary float-right" type="submit">Comment</button>
-        </div>
-    </form>
+    
 </template>
 
 <script>
@@ -29,11 +54,14 @@ export default {
     name: "ConfessionTile",
     props: {
         confession: Object,
+        enableComments: Boolean,
     },
     data() {
         return {
             username: '',
-            comment: ''
+            comment: '',
+            liked: false,
+            iconState: 'far'
         }
     },
     methods: {
@@ -55,13 +83,64 @@ export default {
                 },
                 body: JSON.stringify(newComment),
             })
-
             //const data = await res.json()
+        },
+        async addLike(id) {
+            await fetch('http://localhost:3000/api/confession/liked&id='+id, {
+                method: 'PUT'
+            })
+            //const data = await res.json()
+        },
+        async removeLike(id) {
+            await fetch('http://localhost:3000/api/confession/unliked&id='+id, {
+                method: 'PUT'
+            })
+            //const data = await res.json()
+        },
+        handleLike(id) {
+            this.liked = !this.liked;
+            if(this.liked) {
+                this.iconState = 'fas';
+                this.addLike(id);
+            } else {
+                this.iconState = 'far';
+                this.removeLike(id);
+            }
         }
     }
 }
 </script>
 
 <style>
-
+.tile-shadow {
+  -webkit-box-shadow: 0px 0px 20px 5px rgba(108,41,53,0.75);
+  -moz-box-shadow: 0px 0px 20px 5px rgba(108,41,53,0.75);
+  box-shadow: 0px 0px 20px 5px rgba(108,41,53,0.75);
+  transition: box-shadow,transform .20s ease-out;
+}
+.tile-shadow:hover {
+  -webkit-box-shadow: 0px 0px 20px 10px rgba(108,41,53,0.75);
+  -moz-box-shadow: 0px 0px 20px 10px rgba(108,41,53,0.75);
+  box-shadow: 0px 0px 20px 10px rgba(108,41,53,0.75);
+}
+.confession-tile {
+    padding: 30px;
+    margin-bottom: 50px;
+    border-radius: 10px;
+    background-color: white;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+.confession-tile__content {
+    min-height: 200px;
+}
+.confession-tile__comment ,.confession-tile__content {
+  background-color: #ffedf1 !important;
+  border-radius: 10px;
+  margin: 0 0 5px 0;
+  padding: 10px;
+}
+.confession-tile__like-icon{
+    color: red;
+}
 </style>

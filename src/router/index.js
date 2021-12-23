@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home'
 import Submit from '../views/Submit'
+import ConfessionSingle from '../views/ConfessionSingle'
 
 const routes = [
   {
@@ -13,6 +14,11 @@ const routes = [
     name: 'Submit',
     component: Submit,
   },
+  {
+    path: '/confession/:id',
+    name: 'ConfessionSingle',
+    component: ConfessionSingle,
+  }
 ]
 
 const router = createRouter({
