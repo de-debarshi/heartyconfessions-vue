@@ -15,12 +15,20 @@
         </div>
         <div class="form-group">
             <label for="categories">Confession Category:</label>
-            <select name="categories" id="categories" class="form-control selectpicker" v-model="categories" required multiple>
-                <option>Random</option>
-                <option>Corporate</option>
-                <option>Romance</option>
-                <option>Funny</option>
-            </select>
+            <Multiselect
+                v-model="categories"
+                mode="tags"
+                :close-on-select="false"
+                :searchable="true"
+                :create-option="true"
+                :options="[
+                    { value: 'Random', label: 'Random' },
+                    { value: 'Corporate', label: 'Corporate' },
+                    { value: 'Romance', label: 'Romance' },
+                    { value: 'Funny', label: 'Funny' },
+                ]"
+                class="multiselect-pink"
+            />
         </div>
         <div class="form-group">
             <label for="exampleFormControlTextarea1">Confession:</label>
@@ -34,14 +42,17 @@
 </template>
 
 <script>
+import Multiselect from '@vueform/multiselect'
+
 export default {
     name: "ConfessionSubmit",
+    components: { Multiselect },
     data() {
         return {
             age: '',
             sex: '',
-            categories: '',
-            content: ''
+            categories: [],
+            content: '',
         }
     },
     methods: {

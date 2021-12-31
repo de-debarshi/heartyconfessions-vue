@@ -28,7 +28,7 @@
         <div class="confession-tile__comment-section" v-if="enableComments">
             <div :key="comments._id" v-for="comments in confession.comments">
                 <div class="confession-tile__comment">
-                    {{comments.username}} commented on {{comments.createdAt}}
+                    {{comments.username}} commented on {{formatDate(comments.createdAt)}}
                     {{comments.comment}}
                 </div>
             </div>
@@ -45,6 +45,7 @@
                 </div>
             </form>
         </div>
+        <button @click="shareConfession">Share</button>
     </div>
     
 </template>
@@ -67,13 +68,15 @@ export default {
     methods: {
         onSubmit(e) {
             e.preventDefault()
-
-            const newComment = {
-                _id: this.confession._id,
-                username: this.username,
-                comment: this.comment
+            if(this.username) {
+                localStorage.setItem('username', this.username);
+                const newComment = {
+                    _id: this.confession._id,
+                    username: this.username,
+                    comment: this.comment
+                }
+                this.addComment(newComment)
             }
-            this.addComment(newComment)
         },
         async addComment(newComment) {
             await fetch('http://localhost:3000/api/confession/comment', {
@@ -106,6 +109,29 @@ export default {
                 this.iconState = 'far';
                 this.removeLike(id);
             }
+        },
+        formatDate(dateString) {
+            let convertedDate = new Date(dateString);
+            return convertedDate.toDateString();
+        },
+        async shareConfession(){
+            const shareData = {
+                title: 'Hearty Confessions',
+                text: 'Learn web development on MDN!',
+                url: `http://localhost:8080/confession/${this.confession._id}`
+            }
+            try {
+                await navigator.share(shareData)
+                console.log('MDN shared successfully')
+            } catch(err) {
+                console.log(err)
+            }
+        }
+    },
+    created() {
+        const existingUser = localStorage.getItem('username')
+        if(existingUser) {
+            this.username = existingUser;
         }
     }
 }

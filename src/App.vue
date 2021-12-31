@@ -1,57 +1,24 @@
 <template>
   <Header/>
-  <!-- <swiper
-    :modules="modules"
-    :slides-per-view="3"
-    :space-between="50"
-    :autoplay="{enabled: true}"
-    navigation
-    :pagination="{ clickable: true }"
-    :scrollbar="{ draggable: true }"
-    @swiper="onSwiper"
-    @slideChange="onSlideChange"
-  >
-    <swiper-slide>Slide 1</swiper-slide>
-    <swiper-slide>Slide 2</swiper-slide>
-    <swiper-slide>Slide 3</swiper-slide>
-    <swiper-slide>Slide 4</swiper-slide>
-    <swiper-slide>Slide 5</swiper-slide>
-    ...
-  </swiper> -->
+  <carousel :items-to-show="1" autoplay="5000" wrapAround="true">
+    <slide v-for="slide in 10" :key="slide">
+      {{ slide }}
+    </slide>
+  </carousel>
   <router-view></router-view>
 </template>
 
 <script>
 import Header from './components/Header.vue'
-// Import Swiper Vue.js components
-//import { Navigation, Pagination, Scrollbar, A11y, Autoplay } from 'swiper';
-//import { Swiper, SwiperSlide} from 'swiper/vue';
-//import { Autoplay } from 'swiper';
-// Import Swiper styles
-//import 'swiper/swiper-bundle.min.css'
-//import 'swiper/swiper.min.css'
-
+import 'vue3-carousel/dist/carousel.css';
+import { Carousel, Slide } from 'vue3-carousel';
 export default {
   name: 'App',
   components: {
     Header,
-    //Swiper,
-    //SwiperSlide,
-    
+    Carousel,
+    Slide,
   },
-  /* setup() {
-      const onSwiper = (swiper) => {
-        console.log(swiper);
-      };
-      const onSlideChange = () => {
-        console.log('slide change');
-      };
-      return {
-        onSwiper,
-        onSlideChange,
-        modules: [Navigation, Pagination, Scrollbar, A11y, Autoplay],
-      };
-  }, */
 }
 </script>
 
@@ -115,4 +82,15 @@ body{
 .disabled, :disabled {
     pointer-events: none !important;
 }
+.multiselect-pink {
+  --ms-tag-bg: #ffdde3;
+  --ms-tag-color: #e36379;
+  --ms-option-bg-pointed: #ffdde3;
+  --ms-option-color-pointed: #e36379;
+  --ms-option-bg-selected: #ffdde3;
+  --ms-option-color-selected: #e36379;
+  --ms-option-bg-selected-pointed: #ffdde3;
+  --ms-option-color-selected-pointed: #e36379;
+}
 </style>
+<style src="@vueform/multiselect/themes/default.css"></style>
