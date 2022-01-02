@@ -11,41 +11,50 @@
         {{confession.commentCount}}<br>
         <a :href="`/confession/${confession._id}`">{{confession._id}}</a>
     </div> -->
-    <div class="confession-tile tile-shadow" @click="$emit('tileClicked', confession._id)">
-        <a :href="`/confession/${confession._id}`">{{confession._id}}</a>
+    <div class="confession-tile tile-shadow" :class="{'--small': miniTile}" @click="$emit('tileClicked', confession._id)">
+        <div class="confession-tile__age-gender">
+            <div>Age: {{confession.age}}</div>
+            <div>Gender: {{confession.sex}}</div>
+        </div>
         <div class="confession-tile__content">
-            Age: {{confession.age}}
-            Gender: {{confession.sex}}
             {{confession.content}}
         </div>
         <div class="confession-tile__reaction">
-            <span class="confession-tile__like-icon" @click.stop="handleLike(confession._id)">
-                <font-awesome-icon :icon="[iconState, 'heart']" />
-            </span>
-            {{confession.likes}} people like this
-            {{confession.commentCount}} total comments
+            <div>
+                <span class="confession-tile__like-icon" @click.stop="handleLike(confession._id)" v-if="enableReacts">
+                    <font-awesome-icon :icon="[iconState, 'heart']" />
+                </span>
+                {{confession.likes}} reacts
+            </div>
+            <div>{{confession.commentCount}} comments</div>
         </div>
         <div class="confession-tile__comment-section" v-if="enableComments">
             <div :key="comments._id" v-for="comments in confession.comments">
                 <div class="confession-tile__comment">
-                    {{comments.username}} commented on {{formatDate(comments.createdAt)}}
-                    {{comments.comment}}
+                    <div class="confession-tile__comment-details">{{comments.username}} commented on {{formatDate(comments.createdAt)}}</div>
+                    <div class="confession-tile__comment-content">{{comments.comment}}</div>
                 </div>
             </div>
             <form @submit="onSubmit">
-                <!-- <input type="hidden" name="_id" v-model="_id" value="{{confession._id}}"> -->
                 <div class="form-group">
-                <input type="text" class="form-control" id="username" name="username" v-model="username" required>
+                    <label for="username">Username:</label>
+                    <input type="text" class="form-control" id="username" name="username" v-model="username" required :disabled="usernameDisable">
+                    <button class="btn btn-primary float-right" type="button" @click="usernameDisable=false">Change Username</button>
                 </div>
                 <div class="form-group">
-                <textarea class="form-control" name="comment" placeholder="Type your comment here..." rows="2" v-model="comment" required></textarea>
+                    <textarea class="form-control" name="comment" placeholder="Type your comment here..." rows="2" v-model="comment" required></textarea>
                 </div>
                 <div class="">
                 <button class="btn btn-primary float-right" type="submit">Comment</button>
                 </div>
             </form>
         </div>
-        <button @click="shareConfession">Share</button>
+        <div v-if="enableShare">
+            <button @click="shareConfession">Share</button>
+            {{shareableContent}} 
+            <a :href="shareableLink">Link</a>
+        </div>
+        
     </div>
     
 </template>
@@ -56,13 +65,19 @@ export default {
     props: {
         confession: Object,
         enableComments: Boolean,
+        enableReacts: Boolean,
+        enableShare: Boolean,
+        miniTile: Boolean
     },
     data() {
         return {
             username: '',
+            usernameDisable: false,
             comment: '',
             liked: false,
-            iconState: 'far'
+            iconState: 'far',
+            shareableContent: '',
+            shareableLink: ''
         }
     },
     methods: {
@@ -79,7 +94,7 @@ export default {
             }
         },
         async addComment(newComment) {
-            await fetch('http://localhost:3000/api/confession/comment', {
+            await fetch(`${process.env.VUE_APP_API_URL}/confession/comment`, {
                 method: 'POST',
                 headers: {
                 'Content-type': 'application/json',
@@ -89,13 +104,13 @@ export default {
             //const data = await res.json()
         },
         async addLike(id) {
-            await fetch('http://localhost:3000/api/confession/liked&id='+id, {
+            await fetch(`${process.env.VUE_APP_API_URL}/confession/liked&id=${id}`, {
                 method: 'PUT'
             })
             //const data = await res.json()
         },
         async removeLike(id) {
-            await fetch('http://localhost:3000/api/confession/unliked&id='+id, {
+            await fetch(`${process.env.VUE_APP_API_URL}/confession/unliked&id=${id}`, {
                 method: 'PUT'
             })
             //const data = await res.json()
@@ -112,13 +127,15 @@ export default {
         },
         formatDate(dateString) {
             let convertedDate = new Date(dateString);
-            return convertedDate.toDateString();
+            return convertedDate.toLocaleString();
         },
         async shareConfession(){
+            this.shareableContent = this.confession.content.substr(0, 100) + '... '
+            this.shareableLink = `${process.env.VUE_APP_SITE_URL}/confession/${this.confession._id}`
             const shareData = {
                 title: 'Hearty Confessions',
-                text: 'Learn web development on MDN!',
-                url: `http://localhost:8080/confession/${this.confession._id}`
+                text: this.shareableContent,
+                url: this.shareableLink
             }
             try {
                 await navigator.share(shareData)
@@ -132,6 +149,7 @@ export default {
         const existingUser = localStorage.getItem('username')
         if(existingUser) {
             this.username = existingUser;
+            this.usernameDisable = true;
         }
     }
 }
@@ -142,7 +160,7 @@ export default {
   -webkit-box-shadow: 0px 0px 20px 5px rgba(108,41,53,0.75);
   -moz-box-shadow: 0px 0px 20px 5px rgba(108,41,53,0.75);
   box-shadow: 0px 0px 20px 5px rgba(108,41,53,0.75);
-  transition: box-shadow,transform .20s ease-out;
+  transition: box-shadow .2s ease-out;
 }
 .tile-shadow:hover {
   -webkit-box-shadow: 0px 0px 20px 10px rgba(108,41,53,0.75);
@@ -160,6 +178,15 @@ export default {
 .confession-tile__content {
     min-height: 200px;
 }
+.confession-tile.--small {
+    cursor: pointer;
+}
+.confession-tile.--small .confession-tile__content {
+    max-height: 200px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+}
 .confession-tile__comment ,.confession-tile__content {
   background-color: #ffedf1 !important;
   border-radius: 10px;
@@ -168,5 +195,14 @@ export default {
 }
 .confession-tile__like-icon{
     color: red;
+}
+.confession-tile__age-gender, .confession-tile__reaction{
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+}
+.confession-tile__comment-details {
+    font-size: 12px;
+    font-style: italic;
 }
 </style>

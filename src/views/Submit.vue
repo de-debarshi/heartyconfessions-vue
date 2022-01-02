@@ -1,16 +1,17 @@
 <template>
+  <Header :showConfessBtn="false"/>
   <ConfessionSubmit/>
-  <router-link to="/">Go Back</router-link>
 </template>
 
 <script>
 import ConfessionSubmit from '../components/ConfessionSubmit.vue'
-
+import Header from '../components/Header.vue'
 export default {
   name: 'Submit',
   inheritAttrs: false, // disable 'non-props' warning
   components: {
-    ConfessionSubmit
+    ConfessionSubmit,
+    Header
   }
 };
 </script>

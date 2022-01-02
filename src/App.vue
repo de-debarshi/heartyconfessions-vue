@@ -1,24 +1,11 @@
 <template>
-  <Header/>
-  <carousel :items-to-show="1" autoplay="5000" wrapAround="true">
-    <slide v-for="slide in 10" :key="slide">
-      {{ slide }}
-    </slide>
-  </carousel>
   <router-view></router-view>
 </template>
 
 <script>
-import Header from './components/Header.vue'
-import 'vue3-carousel/dist/carousel.css';
-import { Carousel, Slide } from 'vue3-carousel';
+
 export default {
   name: 'App',
-  components: {
-    Header,
-    Carousel,
-    Slide,
-  },
 }
 </script>
 
@@ -27,14 +14,18 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
   max-width: 1024px;
-  margin: 60px auto;
+  margin: 0px auto 60px;
   position: relative;
 }
-body{
+html {
+  scroll-behavior: smooth;
+}
+body {
   background-color: #ffdde3 !important;
+  padding: 0;
+  margin: 0;
 }
 @font-face {
   font-family: Fresh Script;
@@ -43,6 +34,9 @@ body{
 .clearfix {
   float: none;
   clear: both;
+}
+a {
+  text-decoration: none;
 }
 .btn {
     display: inline-block;

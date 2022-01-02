@@ -1,9 +1,11 @@
 <template>
-  <ConfessionTile :confession="confession" :enableComments="true"/>
+  <Header :showConfessBtn="true"/>
+  <ConfessionTile :confession="confession" :enableComments="true" :enableReacts="true" :enableShare="true"/>
 </template>
 
 <script>
 import ConfessionTile from '../components/ConfessionTile.vue'
+import Header from '../components/Header.vue'
 export default {
   name: 'Home',
   data() {
@@ -13,10 +15,11 @@ export default {
     },
   components: {
     ConfessionTile,
+    Header
   },
   methods: {
         async fetchConfession() {
-            const res = await fetch('http://localhost:3000/api/confession/single&id=' + this.$route.params.id)
+            const res = await fetch(`${process.env.VUE_APP_API_URL}/confession/single&id=${this.$route.params.id}`)
 
             const data = await res.json()
 

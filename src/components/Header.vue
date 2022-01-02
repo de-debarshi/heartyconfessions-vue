@@ -1,21 +1,45 @@
 <template>
     <header>
-        <h1>Hearty Confessions</h1>
+        <div class="header-logo" @click="reloadHomepage()">Hearty Confessions</div>
+        <div v-show="showConfessBtn" class="header-confess-btn"><router-link to="/submit"><button class="btn btn-primary" type="button">Confess</button></router-link></div>
     </header>
 </template>
 
 <script>
 export default {
-    name: "Header"
+    name: "Header",
+    props: {
+        showConfessBtn: Boolean
+    },
+    methods: {
+        reloadHomepage() {
+            window.location.href = "/";
+        }
+    }
 }
 </script>
 
 <style>
 header {
-  font-family: Fresh Script;
+    position: sticky;
+    top: 0px;
+    width: 100%;
+    height: 50px;
+    background-color: #f2afbb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 99;
 }
-h1 {
-    font-size: 100px;
+.header-logo {
+    font-family: Fresh Script;
+    font-size: 30px;
     color: #e36379;
+    margin-left: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.header-confess-btn {
+    margin-right: 20px;
 }
 </style>
