@@ -24,7 +24,7 @@
                 <span class="confession-tile__like-icon" @click.stop="handleLike(confession._id)" v-if="enableReacts">
                     <font-awesome-icon :icon="[iconState, 'heart']" />
                 </span>
-                {{confession.likes}} reacts
+                {{confession.reactionCount}} reacts
             </div>
             <div>{{confession.commentCount}} comments</div>
         </div>
@@ -39,22 +39,40 @@
                 <div class="form-group">
                     <label for="username">Username:</label>
                     <input type="text" class="form-control" id="username" name="username" v-model="username" required :disabled="usernameDisable">
-                    <button class="btn btn-primary float-right" type="button" @click="usernameDisable=false">Change Username</button>
+                    <button class="btn btn-primary" type="button" @click="usernameDisable=false">Change Username</button>
                 </div>
                 <div class="form-group">
                     <textarea class="form-control" name="comment" placeholder="Type your comment here..." rows="2" v-model="comment" required></textarea>
                 </div>
                 <div class="">
-                <button class="btn btn-primary float-right" type="submit">Comment</button>
+                <button class="btn btn-primary" type="submit">Comment</button>
                 </div>
             </form>
         </div>
         <div v-if="enableShare">
-            <button @click="shareConfession">Share</button>
-            {{shareableContent}} 
-            <a :href="shareableLink">Link</a>
+            <button class="btn btn-primary" type="button" @click="shareConfession">Share</button>
         </div>
-        
+        <div id="share-confession-modal" class="modal" v-if="showShareModal">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <div class="modal-header">
+                <span class="close" @click="showShareModal = false">&times;</span>
+                <h2></h2>
+                </div>
+                <div class="modal-body">
+                    <!-- The text field -->
+                    <input type="text" :value="shareableContent + shareableLink" id="dataToCopy">
+
+                    <!-- The button used to copy the text -->
+                    <button class="btn btn-primary" type="button" @click="copyToClipboard">Copy text</button>
+                    <!-- {{shareableContent}} 
+                    <a :href="shareableLink">Link</a> -->
+                </div>
+                <div class="modal-footer">
+                <h3></h3>
+                </div>
+            </div>
+        </div>
     </div>
     
 </template>
@@ -77,7 +95,8 @@ export default {
             liked: false,
             iconState: 'far',
             shareableContent: '',
-            shareableLink: ''
+            shareableLink: '',
+            showShareModal: false
         }
     },
     methods: {
@@ -132,17 +151,37 @@ export default {
         async shareConfession(){
             this.shareableContent = this.confession.content.substr(0, 100) + '... '
             this.shareableLink = `${process.env.VUE_APP_SITE_URL}/confession/${this.confession._id}`
-            const shareData = {
-                title: 'Hearty Confessions',
-                text: this.shareableContent,
-                url: this.shareableLink
+            if(navigator.canShare) {
+                const shareData = {
+                    title: 'Hearty Confessions',
+                    text: this.shareableContent,
+                    url: this.shareableLink
+                }
+                try {
+                    await navigator.share(shareData)
+                    console.log('Shared successfully')
+                } catch(err) {
+                    console.log(err)
+                }
+            } else {
+                this.showShareModal = true;
             }
-            try {
-                await navigator.share(shareData)
-                console.log('MDN shared successfully')
-            } catch(err) {
-                console.log(err)
-            }
+            
+        },
+        copyToClipboard() {
+            console.log("clicked");
+            /* Get the text field */
+            let copyText = document.getElementById("dataToCopy");
+
+            /* Select the text field */
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+            /* Copy the text inside the text field */
+            window.navigator.clipboard.writeText(copyText.value);
+
+            /* Alert the copied text */
+            console.log("Copied the text: " + copyText.value);
         }
     },
     created() {
@@ -195,14 +234,22 @@ export default {
 }
 .confession-tile__like-icon{
     color: red;
+    font-size: 16px;
 }
 .confession-tile__age-gender, .confession-tile__reaction{
     font-size: 12px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 .confession-tile__comment-details {
     font-size: 12px;
     font-style: italic;
+}
+#share-confession-modal {
+    z-index: 99;    
+}
+#share-confession-modal .modal-content {
+    background-color: white;
 }
 </style>

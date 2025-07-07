@@ -21,9 +21,25 @@
         <ConfessionTile :confession="confession" :enableComments="false" :enableReacts="false" :enableShare="false" :miniTile="true" @tileClicked="handleTileClick"/>
     </div>
     <div class="clearfix"></div>
-    <div class="confession-modal" v-if="modalShow">
+    <!-- <div class="confession-modal" v-if="modalShow">
         <div @click="closeModal" class="modal-close-btn"><font-awesome-icon :icon="['far', 'window-close']" /></div>
         <ConfessionTile :confession="confessionClicked" :enableComments="true" :enableReacts="true" :enableShare="true" :miniTile="false"/>
+    </div> -->
+    <!-- The Modal -->
+    <div id="single-confession-modal" class="modal" v-if="modalShow">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <div class="modal-header">
+            <span class="close" @click="closeModal">&times;</span>
+            <h2></h2>
+            </div>
+            <div class="modal-body">
+                <ConfessionTile :confession="confessionClicked" :enableComments="true" :enableReacts="true" :enableShare="true" :miniTile="false"/>
+            </div>
+            <div class="modal-footer">
+            <h3></h3>
+            </div>
+        </div>
     </div>
     <button class="btn btn-primary scroll-to-top-btn" type="button" v-if="showScrollTopBtn" @click="scrollTo('html')">Top</button>
 </template>
@@ -61,6 +77,7 @@ export default {
         async handleTileClick(id) {
             this.confessionClicked = await this.fetchConfession(id)
             this.modalShow = true;
+            document.querySelector('body').style.overflow = 'hidden'
         },
         async fetchConfession(id) {
             const res = await fetch(`${process.env.VUE_APP_API_URL}/confession/single&id=${id}`)
@@ -71,6 +88,7 @@ export default {
         },
         closeModal() {
             this.modalShow = false;
+            document.querySelector('body').style.overflow = 'auto'
         },
         async loadMore() {
             this.page++;
